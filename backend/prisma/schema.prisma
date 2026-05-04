@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("receptionist")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  treatments    Treatment[]
+  sessions     Session[]
+  appointments Appointment[]
+}
+
+model Patient {
+  id               String   @id @default(uuid())
+  fullName         String
+  dateOfBirth      DateTime
+  age              Int
+  gender           String
+  phone            String
+  address          String?
+  emergencyContact String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  medicalHistory MedicalHistory?
+  treatments      Treatment[]
+  appointments   Appointment[]
+  invoices        Invoice[]
+}
+
+model MedicalHistory {
+  id            String   @id @default(uuid())
+  patientId    String   @unique
+  conditions   String?
+  allergies    String?
+  pastInjuries String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+model Treatment {
+  id              String   @id @default(uuid())
+  patientId      String
+  therapistId    String
+  diagnosis     String
+  treatmentPlan String
+  startDate     DateTime
+  endDate       DateTime?
+  status        String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patient   Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  therapist User      @relation(fields: [therapistId], references: [id])
+  sessions  Session[]
+}
+
+model Session {
+  id              String   @id @default(uuid())
+  treatmentId     String
+  therapistId    String
+  sessionDate   DateTime
+  painLevel     Int?
+  notes         String?
+  nextSessionDate DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  treatment        Treatment        @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+  therapist        User             @relation(fields: [therapistId], references: [id])
+  sessionExercises SessionExercise[]
+}
+
+model Exercise {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  videoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessionExercises SessionExercise[]
+}
+
+model SessionExercise {
+  id         String @id @default(uuid())
+  sessionId  String
+  exerciseId String
+  sets       Int
+  reps      Int
+  createdAt  DateTime @default(now())
+
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  patientId   String
+  therapistId String
+  dateTime   DateTime
+  status     String   @default("booked")
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  therapist User    @relation(fields: [therapistId], references: [id])
+}
+
+model Invoice {
+  id          String   @id @default(uuid())
+  patientId  String
+  totalAmount Float
+  status      String   @default("unpaid")
+  createdAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  patient  Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Payment {
+  id            String    @id @default(uuid())
+  invoiceId    String
+  amount       Float
+  paymentMethod String
+  paymentDate  DateTime  @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
