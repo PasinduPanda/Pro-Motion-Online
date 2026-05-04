@@ -1,7 +1,7 @@
 {
-  "name": "physiocare-backend",
+  "name": "pro-motion-backend",
   "version": "1.0.0",
-  "description": "PhysioCare PMS Backend API",
+  "description": "Pro-Motion PMS Backend API",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

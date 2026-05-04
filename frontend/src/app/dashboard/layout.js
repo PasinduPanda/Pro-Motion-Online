@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }) {
             <Activity className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 leading-none">PhysioCare</h1>
+            <h1 className="text-xl font-bold text-gray-900 leading-none">Pro-Motion</h1>
             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">Management</p>
           </div>
         </div>

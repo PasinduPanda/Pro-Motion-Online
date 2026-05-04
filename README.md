@@ -1,33 +1,27 @@
-# PhysioCare Management System
+# Pro-Motion Management System
 
-A comprehensive Physiotherapy Clinic Management System built with Node.js, Express, Next.js, and SQLite.
+A professional Physiotherapy Clinic Management System with sidebar navigation, QR-based patient identity, and comprehensive clinical history tracking.
 
-## How to Run
+## 🛠️ Tech Stack
+- **Frontend:** Next.js 14, Tailwind CSS, Lucide Icons, QRcode.react
+- **Backend:** Node.js, Express, Prisma ORM
+- **Database:** SQLite (Local `dev.db`)
 
-To start both the backend and frontend simultaneously, simply run the main start script from the root directory:
+## 🚀 Quick Start
+1. **Run the whole app:**
+   Double-click `start.bat` in the root folder.
 
-1.  **Double-click `start.bat`** in the project root.
-2.  Wait for the windows to initialize (Backend on port 5000, Frontend on port 3000).
-3.  The system will automatically open your browser to `http://localhost:3000`.
-
-## Login Credentials
-
-Use the following administrator account to access the system:
-
-- **Email:** `admin@physiocare.com`
+2. **Login Credentials:**
+- **Email:** `admin@pro-motion.com`
 - **Password:** `admin123`
 
-## Available Modules
-
-- **Dashboard**: Overview of clinic activity and quick actions.
-- **Patients**: Manage patient records and history.
-- **Treatments**: Create and track treatment plans.
-- **Sessions**: Record progress and assign exercises.
-- **Exercises**: Reusable library of physiotherapy exercises.
-- **Reports**: Revenue, appointments, and growth analytics.
-- **Staff Management**: Admin portal for user registration.
-
-## Technical Requirements
-
-- Node.js (v18+)
-- npm
+## 📋 Features
+- **Sidebar Portal:** Persistent navigation to all modules.
+- **QR Identity:** Instant clinical history access via QR scans.
+- **Patients:** Full CRUD with medical history and conditions.
+- **Treatments & Sessions:** Progress tracking with pain levels and exercises.
+- **Exercises:** Library management with video support.
+- **Appointments:** Scheduling and status tracking.
+- **Invoices:** Billing and payment recording.
+- **Reports:** Revenue and appointment analytics.
+- **Staff Management:** Admin-only user control.

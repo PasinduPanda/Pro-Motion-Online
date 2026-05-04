@@ -37,7 +37,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">PhysioCare</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Pro-Motion</h1>
           <p className="text-gray-500 mt-2">Physiotherapy Clinic Management</p>
         </div>
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Demo credentials:</p>
-          <p>admin@physiocare.com / admin123</p>
+          <p>admin@pro-motion.com / admin123</p>
         </div>
       </div>
     </div>

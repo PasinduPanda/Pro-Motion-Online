@@ -1,22 +1,19 @@
 @echo off
-echo Starting PhysioCare PMS...
-echo.
+echo Starting Pro-Motion PMS...
 
-echo Starting backend...
-start "PhysioCare Backend" cmd /k "cd /d %~dp0backend && node src\index.js"
-timeout /t 2 /nobreak > nul
+:: Kill existing processes
+taskkill /F /IM node.exe /T 2>nul
 
-echo Starting frontend...
-start "PhysioCare Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
-timeout /t 3 /nobreak > nul
+echo Starting Backend...
+start "Pro-Motion Backend" cmd /k "cd /d %~dp0backend && node src\index.js"
 
-echo.
-echo Opening browser...
+echo Starting Frontend...
+start "Pro-Motion Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
+
+echo Waiting for servers to start...
+timeout /t 5 /nobreak >nul
+
 start http://localhost:3000
 
-echo.
-echo PhysioCare is running!
-echo Backend: http://localhost:5000
-echo Frontend: http://localhost:3000
-echo.
+echo Pro-Motion is running!
 pause

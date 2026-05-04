@@ -29,13 +29,13 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'PhysioCare API is running' });
+  res.json({ status: 'ok', message: 'Pro-Motion API is running' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`PhysioCare server running on port ${PORT}`);
+  console.log(`Pro-Motion server running on port ${PORT}`);
 });
 
 module.exports = app;

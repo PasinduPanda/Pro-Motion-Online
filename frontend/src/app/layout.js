@@ -5,7 +5,7 @@ import { AuthProvider } from '../context/AuthContext';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'PhysioCare PMS',
+  title: 'Pro-Motion PMS',
   description: 'Physiotherapy Clinic Management System',
 };
 
