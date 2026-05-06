@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
@@ -6,19 +7,19 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
   
-  const adminExists = await prisma.user.findUnique({ where: { email: 'admin@physiocare.com' } });
+  const adminExists = await prisma.user.findUnique({ where: { email: 'admin@pro-motion.com' } });
   
   if (!adminExists) {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await prisma.user.create({
       data: {
         name: 'Admin',
-        email: 'admin@physiocare.com',
+        email: 'admin@pro-motion.com',
         password: hashedPassword,
         role: 'admin'
       }
     });
-    console.log('Admin user created: admin@physiocare.com / admin123');
+    console.log('Admin user created: admin@pro-motion.com / admin123');
   } else {
     console.log('Admin user already exists');
   }
