@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const prisma = require('./prisma');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -38,8 +40,28 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Pro-Motion server running on port ${PORT}`);
+  
+  // Auto-seed admin user if DB is empty
+  try {
+    const userCount = await prisma.user.count();
+    if (userCount === 0) {
+      console.log('Database empty, auto-seeding admin user...');
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      await prisma.user.create({
+        data: {
+          name: 'Admin',
+          email: 'admin@pro-motion.com',
+          password: hashedPassword,
+          role: 'admin'
+        }
+      });
+      console.log('Admin user auto-created: admin@pro-motion.com / admin123');
+    }
+  } catch (error) {
+    console.error('Auto-seeding failed:', error);
+  }
 });
 
 module.exports = app;
