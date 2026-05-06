@@ -1,9 +1,30 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const prisma = require('../prisma');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
+
+const uploadsDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `diagnosis-${uuidv4()}${ext}`);
+  }
+});
+
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 router.use(authenticate);
 
@@ -19,7 +40,10 @@ router.get('/', async (req, res) => {
       include: {
         patient: true,
         therapist: { select: { id: true, name: true, email: true } },
-        _count: { select: { sessions: true } }
+        _count: { select: { sessions: true } },
+        treatmentExercises: {
+          include: { exercise: true }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -39,6 +63,9 @@ router.get('/:id', async (req, res) => {
         therapist: { select: { id: true, name: true, email: true } },
         sessions: {
           orderBy: { sessionDate: 'desc' }
+        },
+        treatmentExercises: {
+          include: { exercise: true }
         }
       }
     });
@@ -56,34 +83,44 @@ router.get('/:id', async (req, res) => {
 router.post(
   '/',
   authorize('admin', 'therapist'),
-  [
-    body('patientId').notEmpty().withMessage('Patient ID is required'),
-    body('diagnosis').notEmpty().withMessage('Diagnosis is required'),
-    body('treatmentPlan').notEmpty().withMessage('Treatment plan is required'),
-    body('startDate').isISO8601().withMessage('Valid start date is required')
-  ],
+  upload.single('diagnosisImage'),
   async (req, res) => {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+      const { patientId, diagnosis, treatmentPlan, startDate, endDate, status, exercises } = req.body;
+
+      const treatmentData = {
+        patientId,
+        therapistId: req.user.id,
+        diagnosis,
+        treatmentPlan,
+        startDate: startDate ? new Date(startDate) : new Date(),
+        endDate: endDate ? new Date(endDate) : null,
+        status: status || 'active'
+      };
+
+      if (req.file) {
+        treatmentData.diagnosisImage = `/uploads/${req.file.filename}`;
       }
 
-      const { patientId, diagnosis, treatmentPlan, startDate, endDate, status } = req.body;
+      if (exercises) {
+        const parsedExercises = JSON.parse(exercises);
+        if (parsedExercises.length > 0) {
+          treatmentData.treatmentExercises = {
+            create: parsedExercises.map(ex => ({
+              exerciseId: ex.exerciseId,
+              sets: ex.sets,
+              reps: ex.reps
+            }))
+          };
+        }
+      }
 
       const treatment = await prisma.treatment.create({
-        data: {
-          patientId,
-          therapistId: req.user.id,
-          diagnosis,
-          treatmentPlan,
-          startDate: new Date(startDate),
-          endDate: endDate ? new Date(endDate) : null,
-          status: status || 'active'
-        },
+        data: treatmentData,
         include: {
           patient: true,
-          therapist: { select: { id: true, name: true } }
+          therapist: { select: { id: true, name: true } },
+          treatmentExercises: { include: { exercise: true } }
         }
       });
 
@@ -94,9 +131,9 @@ router.post(
   }
 );
 
-router.put('/:id', authorize('admin', 'therapist'), async (req, res) => {
+router.put('/:id', authorize('admin', 'therapist'), upload.single('diagnosisImage'), async (req, res) => {
   try {
-    const { diagnosis, treatmentPlan, startDate, endDate, status } = req.body;
+    const { diagnosis, treatmentPlan, startDate, endDate, status, exercises } = req.body;
 
     const data = {};
     if (diagnosis) data.diagnosis = diagnosis;
@@ -105,9 +142,30 @@ router.put('/:id', authorize('admin', 'therapist'), async (req, res) => {
     if (endDate) data.endDate = new Date(endDate);
     if (status) data.status = status;
 
+    if (req.file) {
+      data.diagnosisImage = `/uploads/${req.file.filename}`;
+    }
+
+    if (exercises) {
+      const parsedExercises = typeof exercises === 'string' ? JSON.parse(exercises) : exercises;
+      await prisma.treatmentExercise.deleteMany({ where: { treatmentId: req.params.id } });
+      if (parsedExercises.length > 0) {
+        data.treatmentExercises = {
+          create: parsedExercises.map(ex => ({
+            exerciseId: ex.exerciseId,
+            sets: ex.sets,
+            reps: ex.reps
+          }))
+        };
+      }
+    }
+
     const treatment = await prisma.treatment.update({
       where: { id: req.params.id },
-      data
+      data,
+      include: {
+        treatmentExercises: { include: { exercise: true } }
+      }
     });
 
     res.json(treatment);

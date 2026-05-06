@@ -1,19 +1,24 @@
 @echo off
-echo Starting Pro-Motion PMS...
+echo PRO-Motion Starting...
 
-:: Kill existing processes
-taskkill /F /IM node.exe /T 2>nul
+cd /d "%~dp0backend"
+npm install multer --save
+npx prisma db push
+node prisma/seed.js
+start "Backend" cmd /k "node src\index.js"
 
-echo Starting Backend...
-start "Pro-Motion Backend" cmd /k "cd /d %~dp0backend && node src\index.js"
+cd /d "%~dp0frontend"
+start "Frontend" cmd /k "npm run dev"
 
-echo Starting Frontend...
-start "Pro-Motion Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
-
-echo Waiting for servers to start...
-timeout /t 5 /nobreak >nul
-
+timeout /t 5 /nobreak
 start http://localhost:3000
 
-echo Pro-Motion is running!
+echo.
+echo ====================
+echo READY!
+echo ====================
+echo Go to: http://localhost:3000
+echo Login: admin@physiocare.com
+echo Pass: admin123
+echo ====================
 pause

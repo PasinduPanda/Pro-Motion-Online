@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { API_URL } from '../../../lib/api';
+import { API_URL } from '../../../../lib/api';
 import axios from 'axios';
 import { 
   User, 
