@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -37,6 +37,7 @@ model Patient {
   treatments      Treatment[]
   appointments   Appointment[]
   invoices        Invoice[]
+  reports         PatientReport[]
 }
 
 model MedicalHistory {
@@ -56,29 +57,32 @@ model Treatment {
   id              String   @id @default(uuid())
   patientId      String
   therapistId    String
-  diagnosis     String
+  diagnosis      String
+  diagnosisImage String?
   treatmentPlan String
-  startDate     DateTime
-  endDate       DateTime?
+  startDate      DateTime
+  endDate        DateTime?
   status        String   @default("active")
-  createdAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   patient   Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
   therapist User      @relation(fields: [therapistId], references: [id])
   sessions  Session[]
+  treatmentExercises TreatmentExercise[]
 }
 
 model Session {
   id              String   @id @default(uuid())
   treatmentId     String
   therapistId    String
-  sessionDate   DateTime
-  painLevel     Int?
-  notes         String?
+  sessionDate    DateTime
+  painLevel      Int?
+  notes          String?
+  sessionImage   String?
   nextSessionDate DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   treatment        Treatment        @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
   therapist        User             @relation(fields: [therapistId], references: [id])
@@ -94,6 +98,19 @@ model Exercise {
   updatedAt   DateTime @updatedAt
 
   sessionExercises SessionExercise[]
+  treatmentExercises TreatmentExercise[]
+}
+
+model TreatmentExercise {
+  id          String @id @default(uuid())
+  treatmentId String
+  exerciseId  String
+  sets        Int
+  reps        Int
+  createdAt   DateTime @default(now())
+
+  treatment Treatment @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+  exercise  Exercise  @relation(fields: [exerciseId], references: [id])
 }
 
 model SessionExercise {
@@ -142,4 +159,16 @@ model Payment {
   paymentDate  DateTime  @default(now())
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model PatientReport {
+  id          String   @id @default(uuid())
+  patientId  String
+  filename   String
+  filePath   String
+  fileType   String
+  description String?
+  uploadedAt DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 }
