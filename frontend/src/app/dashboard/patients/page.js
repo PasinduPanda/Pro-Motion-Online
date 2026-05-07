@@ -16,6 +16,7 @@ export default function PatientsPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
   const [qrPatient, setQrPatient] = useState(null);
+  const [resetPinResult, setResetPinResult] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     dateOfBirth: '',
@@ -109,6 +110,20 @@ export default function PatientsPage() {
       if (selectedPatient) fetchReports(selectedPatient.id);
     } catch (err) {
       alert('Failed to delete report');
+    }
+  };
+
+  const handleResetPin = async (patient) => {
+    try {
+      const res = await axios.post(`${API_URL}/patient/reset-pin`, {
+        patientId: patient.patientId,
+        phone: patient.phone
+      });
+      setResetPinResult(res.data.newPin);
+      // update qrPatient to show new PIN
+      setQrPatient(prev => ({ ...prev, _displayPin: res.data.newPin }));
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to reset PIN');
     }
   };
 
@@ -240,8 +255,25 @@ export default function PatientsPage() {
               />
             </div>
             <p className="text-xl font-bold text-gray-900 mb-1">{qrPatient.fullName}</p>
-            <p className="text-sm text-gray-500 mb-2">Patient ID: <span className="font-mono font-bold">{qrPatient.patientId || 'Generating...'}</span></p>
-            <p className="text-xs text-gray-400 mb-6">Scan to access full clinical history</p>
+            <p className="text-sm text-gray-500 mb-2">Patient ID: <span className="font-mono font-bold text-primary-700">{qrPatient.patientId || 'Generating...'}</span></p>
+            
+            {/* Show PIN if newly registered or reset */}
+            {(qrPatient.pin?.length <= 4 || qrPatient._displayPin) ? (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <p className="text-xs text-yellow-700 font-medium mb-1">🔑 Patient PIN (show once only)</p>
+                <p className="text-3xl font-bold text-yellow-800 tracking-[0.3em]">{qrPatient._displayPin || qrPatient.pin}</p>
+                <p className="text-xs text-yellow-600 mt-1">Give this PIN to the patient — it cannot be retrieved again</p>
+              </div>
+            ) : (
+              <button 
+                onClick={() => handleResetPin(qrPatient)}
+                className="mb-4 text-sm text-orange-600 hover:text-orange-800 underline"
+              >
+                🔄 Reset & View PIN
+              </button>
+            )}
+            
+            <p className="text-xs text-gray-400 mb-4">Scan to access full clinical history</p>
             <div className="flex space-x-3">
               <button onClick={() => printPatientCard(qrPatient)} className="btn btn-primary flex-1 py-3 flex items-center justify-center font-bold">
                 <Printer className="w-4 h-4 mr-2" /> Print Card
