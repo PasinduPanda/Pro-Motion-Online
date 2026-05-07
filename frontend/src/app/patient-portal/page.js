@@ -7,7 +7,11 @@ import { Activity, Calendar, FileText, Dumbbell, CreditCard, LogOut } from 'luci
 import { API_URL } from '../../lib/api';
 
 export default function PatientPortalPage() {
+  const [patient, setPatient] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [exercises, setExercises] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     fetchPatient();
@@ -335,11 +339,6 @@ export default function PatientPortalPage() {
               </div>
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
         </div>
       </div>
     </div>
