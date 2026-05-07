@@ -64,6 +64,30 @@ app.listen(PORT, async () => {
   } catch (error) {
     console.error('Auto-seeding failed:', error);
   }
+
+  // Backfill patientId and PIN for existing patients that are missing them
+  try {
+    const patientsWithoutId = await prisma.patient.findMany({
+      where: { patientId: null }
+    });
+    if (patientsWithoutId.length > 0) {
+      console.log(`Backfilling patientId for ${patientsWithoutId.length} existing patients...`);
+      for (const patient of patientsWithoutId) {
+        const patientId = 'PT' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        const pin = Math.floor(1000 + Math.random() * 9000).toString();
+        const hashedPin = await bcrypt.hash(pin, 10);
+        await prisma.patient.update({
+          where: { id: patient.id },
+          data: { patientId, pin: hashedPin }
+        });
+        console.log(`  Assigned ${patientId} to patient: ${patient.fullName}`);
+      }
+      console.log('Backfill complete.');
+    }
+  } catch (error) {
+    console.error('Patient backfill failed:', error);
+  }
 });
+
 
 module.exports = app;

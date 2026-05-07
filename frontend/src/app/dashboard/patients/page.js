@@ -203,11 +203,12 @@ export default function PatientsPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center space-x-3">
-                    {patient.patientId && (
-                      <button onClick={() => printPatientCard(patient)} className="text-blue-600 hover:text-blue-800" title="Print Card">
-                        <Printer className="w-5 h-5" />
-                      </button>
-                    )}
+                    <button onClick={() => setQrPatient(patient)} className="text-primary-600 hover:text-primary-800" title="Show QR Code">
+                      <QrCode className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => printPatientCard(patient)} className="text-blue-600 hover:text-blue-800" title="Print Card">
+                      <Printer className="w-5 h-5" />
+                    </button>
                     <button onClick={() => handleDelete(patient.id)} className="text-red-600 hover:text-red-800">
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -219,6 +220,38 @@ export default function PatientsPage() {
         </table>
         {patients.length === 0 && <div className="text-center py-8 text-gray-500">No patients found</div>}
       </div>
+
+      {/* QR Code Modal */}
+      {qrPatient && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm text-center shadow-2xl">
+            <div className="mb-6 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-gray-900">Patient QR Badge</h2>
+              <button onClick={() => setQrPatient(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 bg-white border-2 border-gray-100 rounded-2xl shadow-inner mb-4 inline-block">
+              <QRCodeCanvas
+                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/patients/${qrPatient.id}`}
+                size={200}
+                level="H"
+              />
+            </div>
+            <p className="text-xl font-bold text-gray-900 mb-1">{qrPatient.fullName}</p>
+            <p className="text-sm text-gray-500 mb-2">Patient ID: <span className="font-mono font-bold">{qrPatient.patientId || 'Generating...'}</span></p>
+            <p className="text-xs text-gray-400 mb-6">Scan to access full clinical history</p>
+            <div className="flex space-x-3">
+              <button onClick={() => printPatientCard(qrPatient)} className="btn btn-primary flex-1 py-3 flex items-center justify-center font-bold">
+                <Printer className="w-4 h-4 mr-2" /> Print Card
+              </button>
+              <button onClick={() => setQrPatient(null)} className="btn btn-secondary flex-1 py-3 font-bold">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
