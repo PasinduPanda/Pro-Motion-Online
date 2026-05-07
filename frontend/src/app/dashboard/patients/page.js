@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { API_URL } from '../../../lib/api';
 import axios from 'axios';
 import { Search, Plus, Upload, FileText, X, Trash2, QrCode, Printer, Download } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 export default function PatientsPage() {
   const [patients, setPatients] = useState([]);
