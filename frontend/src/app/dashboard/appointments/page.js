@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { API_URL } from '../../../lib/api';
 import axios from 'axios';
-import { Search, Plus, Calendar as CalendarIcon, Clock, X } from 'lucide-react';
+import { Plus, Calendar, Clock, X } from 'lucide-react';
 import { format, addDays } from 'date-fns';
+
+const API_URL = 'http://localhost:5000/api';
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
@@ -26,16 +27,17 @@ export default function AppointmentsPage() {
 
   const fetchData = async () => {
     try {
+      const token = localStorage.getItem('token');
       const [appointmentsRes, patientsRes, therapistsRes] = await Promise.all([
         axios.get(`${API_URL}/appointments`, { params: { date: selectedDate } }),
-        axios.get(`${API_URL}/patients`, { limit: 100 }),
-        axios.get(`${API_URL}/users`).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/patients`, { params: { limit: 100 } }),
+        axios.get(`${API_URL}/users`),
       ]);
       setAppointments(appointmentsRes.data);
       setPatients(patientsRes.data.patients || []);
       setTherapists(therapistsRes.data.filter((u) => u.role === 'therapist') || []);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
     }
@@ -43,12 +45,32 @@ export default function AppointmentsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.patientId) {
+      alert('Please select a patient');
+      return;
+    }
+    if (!formData.therapistId) {
+      alert('Please select a therapist');
+      return;
+    }
+    if (!formData.dateTime) {
+      alert('Please select a date and time');
+      return;
+    }
+
     try {
       const payload = {
-        ...formData,
+        patientId: formData.patientId,
+        therapistId: formData.therapistId,
         dateTime: new Date(formData.dateTime).toISOString(),
+        notes: formData.notes || ''
       };
+      
+      console.log('Creating appointment with payload:', payload);
+      
       await axios.post(`${API_URL}/appointments`, payload);
+      
       setShowModal(false);
       setFormData({
         patientId: '',
@@ -57,7 +79,9 @@ export default function AppointmentsPage() {
         notes: '',
       });
       fetchData();
+      alert('Appointment created successfully!');
     } catch (err) {
+      console.error('Error creating appointment:', err.response?.data || err.message);
       alert(err.response?.data?.error || 'Failed to create appointment');
     }
   };
@@ -76,7 +100,7 @@ export default function AppointmentsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -104,7 +128,7 @@ export default function AppointmentsPage() {
                 key={dateStr}
                 onClick={() => setSelectedDate(dateStr)}
                 className={`flex-shrink-0 px-4 py-2 rounded-lg ${
-                  isSelected ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 <div className="text-xs">{format(date, 'EEE')}</div>
@@ -125,8 +149,8 @@ export default function AppointmentsPage() {
             <div key={apt.id} className="card">
               <div className="flex justify-between items-start">
                 <div className="flex items-start space-x-4">
-                  <div className="bg-primary-100 p-3 rounded-lg">
-                    <Clock className="w-5 h-5 text-primary-600" />
+                  <div className="bg-blue-100 p-3 rounded-lg">
+                    <Clock className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{apt.patient?.fullName}</h3>
@@ -174,7 +198,7 @@ export default function AppointmentsPage() {
                   <option value="">Select patient</option>
                   {patients.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.fullName}
+                      {p.fullName} ({p.phone})
                     </option>
                   ))}
                 </select>

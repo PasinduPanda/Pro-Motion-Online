@@ -1,11 +1,8 @@
 const express = require('express');
-const { body, validationResult, query } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const prisma = require('../prisma');
-const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();
-
-router.use(authenticate);
 
 router.get('/', async (req, res) => {
   try {
@@ -44,10 +41,7 @@ router.get('/today', async (req, res) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const appointments = await prisma.appointment.findMany({
-      where: {
-        dateTime: { gte: today, lt: tomorrow },
-        status: 'booked'
-      },
+      where: { dateTime: { gte: today, lt: tomorrow }, status: 'booked' },
       include: {
         patient: { select: { id: true, fullName: true, phone: true } },
         therapist: { select: { id: true, name: true } }
@@ -57,7 +51,7 @@ router.get('/today', async (req, res) => {
 
     res.json(appointments);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch today\'s appointments' });
+    res.status(500).json({ error: 'Failed to fetch appointments' });
   }
 });
 
@@ -81,44 +75,35 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post(
-  '/',
-  authorize('admin', 'receptionist'),
-  [
-    body('patientId').notEmpty().withMessage('Patient ID is required'),
-    body('therapistId').notEmpty().withMessage('Therapist ID is required'),
-    body('dateTime').isISO8601().withMessage('Valid date/time is required')
-  ],
-  async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+router.post('/', async (req, res) => {
+  try {
+    const { patientId, therapistId, dateTime, notes } = req.body;
 
-      const { patientId, therapistId, dateTime, notes } = req.body;
-
-      const appointment = await prisma.appointment.create({
-        data: {
-          patientId,
-          therapistId,
-          dateTime: new Date(dateTime),
-          notes
-        },
-        include: {
-          patient: { select: { id: true, fullName: true, phone: true } },
-          therapist: { select: { id: true, name: true } }
-        }
-      });
-
-      res.status(201).json(appointment);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to create appointment' });
+    if (!patientId || !therapistId || !dateTime) {
+      return res.status(400).json({ error: 'Patient ID, Therapist ID, and Date/Time are required' });
     }
-  }
-);
 
-router.put('/:id', authorize('admin', 'receptionist'), async (req, res) => {
+    const appointment = await prisma.appointment.create({
+      data: {
+        patientId,
+        therapistId,
+        dateTime: new Date(dateTime),
+        notes
+      },
+      include: {
+        patient: { select: { id: true, fullName: true, phone: true } },
+        therapist: { select: { id: true, name: true } }
+      }
+    });
+
+    res.status(201).json(appointment);
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    res.status(500).json({ error: 'Failed to create appointment: ' + error.message });
+  }
+});
+
+router.put('/:id', async (req, res) => {
   try {
     const { patientId, therapistId, dateTime, status, notes } = req.body;
 
@@ -144,7 +129,7 @@ router.put('/:id', authorize('admin', 'receptionist'), async (req, res) => {
   }
 });
 
-router.delete('/:id', authorize('admin'), async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     await prisma.appointment.delete({ where: { id: req.params.id } });
     res.json({ message: 'Appointment deleted successfully' });
