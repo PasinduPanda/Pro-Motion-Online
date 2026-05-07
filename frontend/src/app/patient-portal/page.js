@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Activity, Calendar, FileText, Dumbbell, CreditCard, LogOut } from 'lucide-react';
 import { API_URL } from '../../lib/api';
 
