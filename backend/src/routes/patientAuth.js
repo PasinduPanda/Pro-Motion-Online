@@ -200,7 +200,7 @@ router.get('/exercises', authenticate, async (req, res) => {
     }
 
     const treatments = await prisma.treatment.findMany({
-      where: { patientId: req.user.id, status: 'active' },
+      where: { patientId: req.user.id },
       include: {
         sessions: {
           include: { sessionExercises: { include: { exercise: true } } }
