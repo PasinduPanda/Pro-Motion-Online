@@ -89,6 +89,12 @@ export default function LoginPage() {
           <p>Demo credentials:</p>
           <p>admin@pro-motion.com / admin123</p>
         </div>
+        
+        <div className="mt-4 text-center pt-4 border-t">
+          <a href="/patient-portal/login" className="text-sm text-blue-600 hover:text-blue-800">
+            Patient Portal Login
+          </a>
+        </div>
       </div>
     </div>
   );

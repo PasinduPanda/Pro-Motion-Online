@@ -13,15 +13,29 @@ const authenticate = async (req, res, next) => {
     
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId }
-      });
+      
+      if (decoded.role === 'patient') {
+        const patient = await prisma.patient.findUnique({
+          where: { id: decoded.userId }
+        });
 
-      if (!user) {
-        return res.status(401).json({ error: 'User not found' });
+        if (!patient) {
+          return res.status(401).json({ error: 'Patient not found' });
+        }
+
+        req.user = { ...patient, role: 'patient' };
+      } else {
+        const user = await prisma.user.findUnique({
+          where: { id: decoded.userId }
+        });
+
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' });
+        }
+
+        req.user = user;
       }
 
-      req.user = user;
       next();
     } catch (err) {
       return res.status(401).json({ error: 'Invalid token' });

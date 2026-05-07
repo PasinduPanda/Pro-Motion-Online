@@ -15,6 +15,7 @@ const invoiceRoutes = require('./routes/invoices');
 const reportRoutes = require('./routes/reports');
 const uploadRoutes = require('./routes/uploads');
 const userRoutes = require('./routes/users');
+const patientAuthRoutes = require('./routes/patientAuth');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/patient', patientAuthRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Pro-Motion API is running' });
