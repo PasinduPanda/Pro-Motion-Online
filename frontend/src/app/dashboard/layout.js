@@ -95,11 +95,11 @@ export default function DashboardLayout({ children }) {
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center space-x-3 mb-3">
               <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold uppercase">
-                {user.name.charAt(0)}
+                {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="overflow-hidden">
-                <p className="text-sm font-bold text-gray-900 truncate">{user.name}</p>
-                <p className="text-xs text-gray-400 capitalize">{user.role}</p>
+                <p className="text-sm font-bold text-gray-900 truncate">{user?.name || 'User'}</p>
+                <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
               </div>
             </div>
             <button
