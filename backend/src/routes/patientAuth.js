@@ -7,35 +7,7 @@ const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get current patient profile
-router.get('/me', authenticate, async (req, res) => {
-  try {
-    const patient = await prisma.patient.findUnique({
-      where: { id: req.user.userId },
-      include: {
-        medicalHistory: true,
-        treatments: {
-          include: { therapist: true },
-          orderBy: { date: 'desc' }
-        },
-        appointments: {
-          orderBy: { dateTime: 'desc' }
-        },
-        invoices: {
-          orderBy: { date: 'desc' }
-        }
-      }
-    });
-
-    if (!patient) {
-      return res.status(404).json({ error: 'Patient not found' });
-    }
-
-    res.json(patient);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch profile' });
-  }
-});
+// Get current patient profile - This is handled by the route below
 
 router.post('/register', [
   body('fullName').notEmpty().withMessage('Name is required'),
