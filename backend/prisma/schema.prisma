@@ -23,7 +23,7 @@ model User {
 
 model Patient {
   id               String   @id @default(uuid())
-  patientId        String   @unique
+  patientId        String?  @unique
   fullName         String
   email           String?
   dateOfBirth      DateTime

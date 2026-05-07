@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { API_URL } from '../../lib/api';
+import { API_URL } from '../../../lib/api';
 import axios from 'axios';
 import { Search, Plus, Upload, FileText, X, Trash2, QrCode, Printer, Download } from 'lucide-react';
 
