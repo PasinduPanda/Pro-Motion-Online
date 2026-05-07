@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../../../lib/api';
 import axios from 'axios';
-import { Plus, Clock, Search, Trash2, Dumbbell, Calendar, ChevronRight } from 'lucide-react';
+import { Plus, Clock, Search, Trash2, Dumbbell, Calendar, ChevronRight, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function SessionsPage() {
