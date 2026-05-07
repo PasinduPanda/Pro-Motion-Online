@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { API_URL } from '../../../lib/api';
 
 export default function PatientLoginPage() {
   const [patientId, setPatientId] = useState('');
   const [phone, setPhone] = useState('');
-  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -20,8 +20,7 @@ export default function PatientLoginPage() {
     try {
       const res = await axios.post(`${API_URL}/patient/login`, { 
         patientId: patientId.trim(), 
-        phone: phone.trim(), 
-        pin: pin.trim() 
+        phone: phone.trim()
       });
       
       const { token, patient } = res.data;
@@ -29,7 +28,7 @@ export default function PatientLoginPage() {
       localStorage.setItem('patient', JSON.stringify(patient));
       router.push('/patient-portal');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your Patient ID, Phone number, and PIN.');
+      setError(err.response?.data?.error || 'Login failed. Please check your Patient ID and Phone number.');
     } finally {
       setLoading(false);
     }
@@ -41,7 +40,7 @@ export default function PatientLoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-blue-600">Pro-Motion</h1>
           <p className="text-gray-500 mt-2">Patient Portal</p>
-          <p className="text-sm text-gray-400 mt-1">Use your Patient ID, Phone number & PIN</p>
+          <p className="text-sm text-gray-400 mt-1">Sign in with your Patient ID and registered phone number</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -64,7 +63,7 @@ export default function PatientLoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Registered Phone Number</label>
             <input
               type="tel"
               value={phone}
@@ -75,26 +74,13 @@ export default function PatientLoginPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">PIN (4 digits)</label>
-            <input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="input"
-              placeholder="Enter your 4-digit PIN"
-              maxLength={4}
-              required
-            />
-          </div>
-
           <button type="submit" disabled={loading} className="btn btn-primary w-full py-3">
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Get your Patient ID & PIN from the clinic</p>
+          <p>Get your Patient ID from the clinic</p>
         </div>
       </div>
     </div>

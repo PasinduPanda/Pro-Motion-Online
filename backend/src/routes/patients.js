@@ -103,13 +103,10 @@ router.post(
 
       const age = new Date().getFullYear() - new Date(dateOfBirth).getFullYear();
       const patientId = 'PT' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
-      const pin = Math.floor(1000 + Math.random() * 9000).toString();
-      const hashedPin = await bcrypt.hash(pin, 10);
 
       const patient = await prisma.patient.create({
         data: {
           patientId,
-          pin: hashedPin,
           fullName,
           dateOfBirth: new Date(dateOfBirth),
           age,
@@ -129,7 +126,7 @@ router.post(
         include: { medicalHistory: true }
       });
 
-      res.status(201).json({ ...patient, pin: pin });
+      res.status(201).json(patient);
     } catch (error) {
       res.status(500).json({ error: 'Failed to create patient' });
     }

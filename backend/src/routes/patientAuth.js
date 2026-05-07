@@ -65,8 +65,7 @@ router.post('/register', [
 
 router.post('/login', [
   body('patientId').notEmpty().withMessage('Patient ID is required'),
-  body('phone').notEmpty().withMessage('Phone is required'),
-  body('pin').notEmpty().withMessage('PIN is required')
+  body('phone').notEmpty().withMessage('Phone is required')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -74,23 +73,14 @@ router.post('/login', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { patientId, phone, pin } = req.body;
+    const { patientId, phone } = req.body;
 
     const patient = await prisma.patient.findFirst({ 
       where: { patientId, phone } 
     });
     
     if (!patient) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    if (!patient.pin) {
-      return res.status(401).json({ error: 'Patient PIN not set. Please contact clinic.' });
-    }
-
-    const isValidPin = await bcrypt.compare(pin, patient.pin);
-    if (!isValidPin) {
-      return res.status(401).json({ error: 'Invalid PIN' });
+      return res.status(401).json({ error: 'Invalid Patient ID or Phone number' });
     }
 
     const token = jwt.sign(

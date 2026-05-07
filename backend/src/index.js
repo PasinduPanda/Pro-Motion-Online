@@ -74,11 +74,9 @@ app.listen(PORT, async () => {
       console.log(`Backfilling patientId for ${patientsWithoutId.length} existing patients...`);
       for (const patient of patientsWithoutId) {
         const patientId = 'PT' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
-        const pin = Math.floor(1000 + Math.random() * 9000).toString();
-        const hashedPin = await bcrypt.hash(pin, 10);
         await prisma.patient.update({
           where: { id: patient.id },
-          data: { patientId, pin: hashedPin }
+          data: { patientId }
         });
         console.log(`  Assigned ${patientId} to patient: ${patient.fullName}`);
       }
